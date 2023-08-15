@@ -37,14 +37,14 @@ namespace ApiPelicula.Controllers
         }
 
 
-        [HttpGet("categoriaId: int", Name ="GetCategoria")]
+        [HttpGet("categoriaId:int", Name ="GetCategoria")]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public IActionResult GetCategoria(int id)
+        public IActionResult GetCategoria(int categoriaId)
         {
-            var categoria = _repositorio.GetCategoria(id);
+            var categoria = _repositorio.GetCategoria(categoriaId);
 
             if(categoria == null)
             {
@@ -81,6 +81,46 @@ namespace ApiPelicula.Controllers
                 return StatusCode(404, ModelState);
             }
             return CreatedAtRoute("GetCategoria", new { categoriaId = categoria.Id }, categoria);
+        }
+
+        [HttpPatch("{categoriaId:int}", Name = "ActualizarPatchCategoria")]
+        public IActionResult ActualizarPatchCategoria(int categoriaId, [FromBody] CategoriaDto categoriaDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (categoriaDto == null || categoriaDto.Id != categoriaId)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var categoria = _mapper.Map<Categoria>(categoriaDto);
+            if (!_repositorio.ActualizarCategoria(categoria))
+            {
+                ModelState.AddModelError("", $"Algo salió mal actualizando el registro {categoria.Nombre}");
+                return StatusCode(500, ModelState);
+            }
+            return NoContent();
+        }
+
+        [HttpDelete("{categoriaId:int}", Name = "EliminarCategoria")]
+        public IActionResult EliminarCategoria(int categoriaId)
+        {
+            if (!_repositorio.ExisteCategoria(categoriaId))
+            {
+                return NotFound();  
+            }
+
+            var categoria = _repositorio.GetCategoria(categoriaId);
+
+            if (!_repositorio.BorrarCategoria(categoria))
+            {
+                ModelState.AddModelError("", $"Algo salió mal eliminando el registro {categoria.Nombre}");
+                return StatusCode(500, ModelState);
+            }
+            return NoContent();
         }
 
 
