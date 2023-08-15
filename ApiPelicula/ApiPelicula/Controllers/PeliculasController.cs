@@ -110,5 +110,46 @@ namespace ApiPelicula.Controllers
 
             return NoContent();
         }
+
+
+        [HttpGet("GetPeliculasEnCategoria/{categoriaId:int}")]
+        public IActionResult GetPeliculasEnCategoria(int categoriaId)
+        {
+            var listaPeliculas = _repositorio.GetPeliculasEnCategoria(categoriaId);
+
+            if(listaPeliculas == null)
+            {
+                return NotFound();
+            }
+
+            var itemPelicula = new List<PeliculaDto>();
+            foreach (var item in listaPeliculas)
+            {
+                itemPelicula.Add(_mapper.Map<PeliculaDto>(item));
+            }
+
+            return Ok(itemPelicula);
+        }
+
+        [HttpGet("Buscar")]
+        public IActionResult Buscar(string nombre)
+        {
+            try
+            {
+                var resultado = _repositorio.BuscarPelicula(nombre.Trim());
+                if (resultado.Any())
+                {
+                    return Ok(resultado);
+                }
+                return NotFound();
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error recuperando datos");
+            }
+           
+        }
+
+
     }
 }
