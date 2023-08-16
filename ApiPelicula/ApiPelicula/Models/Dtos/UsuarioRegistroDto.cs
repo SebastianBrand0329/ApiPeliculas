@@ -4,8 +4,6 @@ namespace ApiPelicula.Models.Dtos
 {
     public class UsuarioRegistroDto
     {
-
-
         [Required(ErrorMessage ="El campo {0} es obligatorio")]
         public string NombreUsuario { get; set; }
 
