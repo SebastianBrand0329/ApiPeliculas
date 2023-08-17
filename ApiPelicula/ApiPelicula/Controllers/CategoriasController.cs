@@ -2,12 +2,13 @@
 using ApiPelicula.Models.Dtos;
 using ApiPelicula.Repositorio.IRepositorio;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApiPelicula.Controllers
 {
     [ApiController]
-    [Route("api/categorias")]    
+    [Route("api/categorias")]
     public class CategoriasController : ControllerBase
     {
         private readonly ICategoriaRepositorio _repositorio;
@@ -19,7 +20,9 @@ namespace ApiPelicula.Controllers
             _mapper = mapper;
         }
 
+        [AllowAnonymous]
         [HttpGet]
+        [ResponseCache(Duration = 20)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public IActionResult GetCategoria()
@@ -30,14 +33,16 @@ namespace ApiPelicula.Controllers
 
             foreach (var item in lista)
             {
-                listaCategoriaDto.Add(_mapper.Map<CategoriaDto>(item)); 
+                listaCategoriaDto.Add(_mapper.Map<CategoriaDto>(item));
             }
 
             return Ok(listaCategoriaDto);
         }
 
-
-        [HttpGet("categoriaId:int", Name ="GetCategoria")]
+        [AllowAnonymous]
+        [HttpGet("categoriaId:int", Name = "GetCategoria")]
+        //[ResponseCache(/*Duration =30*/ Location = ResponseCacheLocation.None, NoStore = true)]
+        [ResponseCache(CacheProfileName = "PorDefecto")]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -46,7 +51,7 @@ namespace ApiPelicula.Controllers
         {
             var categoria = _repositorio.GetCategoria(categoriaId);
 
-            if(categoria == null)
+            if (categoria == null)
             {
                 return NotFound();
             }
@@ -55,6 +60,7 @@ namespace ApiPelicula.Controllers
 
         }
 
+        [Authorize(Roles = "admin")]
         [HttpPost]
         public IActionResult CreateCategoria([FromBody] CategoriaCreacionDto categoriaCreacion)
         {
@@ -63,7 +69,7 @@ namespace ApiPelicula.Controllers
                 return BadRequest(ModelState);
             }
 
-            if(categoriaCreacion is null)
+            if (categoriaCreacion is null)
             {
                 return BadRequest(ModelState);
             }
@@ -83,6 +89,7 @@ namespace ApiPelicula.Controllers
             return CreatedAtRoute("GetCategoria", new { categoriaId = categoria.Id }, categoria);
         }
 
+        [Authorize(Roles = "admin")]
         [HttpPatch("{categoriaId:int}", Name = "ActualizarPatchCategoria")]
         public IActionResult ActualizarPatchCategoria(int categoriaId, [FromBody] CategoriaDto categoriaDto)
         {
@@ -105,12 +112,13 @@ namespace ApiPelicula.Controllers
             return NoContent();
         }
 
+        [Authorize(Roles = "admin")]
         [HttpDelete("{categoriaId:int}", Name = "EliminarCategoria")]
         public IActionResult EliminarCategoria(int categoriaId)
         {
             if (!_repositorio.ExisteCategoria(categoriaId))
             {
-                return NotFound();  
+                return NotFound();
             }
 
             var categoria = _repositorio.GetCategoria(categoriaId);

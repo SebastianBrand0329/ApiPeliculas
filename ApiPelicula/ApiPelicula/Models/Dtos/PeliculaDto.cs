@@ -10,7 +10,7 @@ namespace ApiPelicula.Models.Dtos
         [Required(ErrorMessage ="El campo {0} es obligatorio")]
         public string? Nombre { get; set; }
 
-        public string? RutaImagen { get; set; }
+        public byte[]? RutaImagen { get; set; }
 
         [Required(ErrorMessage = "El campo {0} es obligatorio")]
         public string? Descripcion { get; set; }

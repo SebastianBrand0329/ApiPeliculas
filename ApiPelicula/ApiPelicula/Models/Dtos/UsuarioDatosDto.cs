@@ -2,20 +2,13 @@
 
 namespace ApiPelicula.Models.Dtos
 {
-    public class UsuarioDto
+    public class UsuarioDatosDto
     {
-        [Key]
+
         public string Id { get; set; }
 
-        [Required]
         public string UserName { get; set; }
 
         public string Nombre { get; set; }
-
-        public string Password { get; set; }
-
-        public DateTime FechaCreacion { get; set; }
-
-        public string Role { get; set; }
     }
 }

@@ -3,7 +3,9 @@ using ApiPelicula.Models.Dtos;
 using ApiPelicula.Repositorio.IRepositorio;
 using AutoMapper;
 using AutoMapper.Configuration.Annotations;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Data;
 
 namespace ApiPelicula.Controllers
 {
@@ -20,6 +22,7 @@ namespace ApiPelicula.Controllers
             _mapper = mapper;
         }
 
+        [AllowAnonymous]
         [HttpGet]
         public IActionResult GetPeliculas()
         {
@@ -33,6 +36,7 @@ namespace ApiPelicula.Controllers
             return Ok(listaPeliculasDto);
         }
 
+        [AllowAnonymous]
         [HttpGet("{peliculaId:int}", Name = "GetPelicula")]
         public IActionResult GetPelicula(int peliculaId)
         {
@@ -45,6 +49,7 @@ namespace ApiPelicula.Controllers
             return Ok(_mapper.Map<PeliculaDto>(pelicula));
         }
 
+        [Authorize(Roles = "admin")]
         [HttpPost]
         public IActionResult CrearPelicula([FromBody] PeliculaDto peliculaDto)
         {
@@ -75,6 +80,7 @@ namespace ApiPelicula.Controllers
             return CreatedAtRoute("GetPelicula", new { peliculaId = pelicula.Id }, pelicula);
         }
 
+        [Authorize(Roles = "admin")]
         [HttpPatch("{peliculaId:int}", Name = "ActualizarPatchPelicula")]
         public IActionResult ActualizarPatchPelicula(int peliculaId, [FromBody] PeliculaDto peliculaDto)
         {
@@ -92,6 +98,7 @@ namespace ApiPelicula.Controllers
             return NoContent();
         }
 
+        [Authorize(Roles = "admin")]
         [HttpDelete("{peliculaId:int}", Name = "BorrarPelicula")]
         public IActionResult BorrarPelicula(int peliculaId)
         {
@@ -111,13 +118,13 @@ namespace ApiPelicula.Controllers
             return NoContent();
         }
 
-
+        [AllowAnonymous]
         [HttpGet("GetPeliculasEnCategoria/{categoriaId:int}")]
         public IActionResult GetPeliculasEnCategoria(int categoriaId)
         {
             var listaPeliculas = _repositorio.GetPeliculasEnCategoria(categoriaId);
 
-            if(listaPeliculas == null)
+            if (listaPeliculas == null)
             {
                 return NotFound();
             }
@@ -131,6 +138,7 @@ namespace ApiPelicula.Controllers
             return Ok(itemPelicula);
         }
 
+        [AllowAnonymous]
         [HttpGet("Buscar")]
         public IActionResult Buscar(string nombre)
         {
@@ -147,7 +155,7 @@ namespace ApiPelicula.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "Error recuperando datos");
             }
-           
+
         }
 
 

@@ -2,6 +2,7 @@
 using ApiPelicula.Models.Dtos;
 using ApiPelicula.Repositorio.IRepositorio;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -22,6 +23,7 @@ namespace ApiPelicula.Controllers
             _mapper = mapper;
         }
 
+        [Authorize(Roles = "admin")]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -39,12 +41,13 @@ namespace ApiPelicula.Controllers
             return Ok(listaUsuariosDto);
         }
 
-        [HttpGet("usuarioId:int", Name = "GetUsuario")]
-        public IActionResult GetUsuario(int usuarioId)
+        [Authorize(Roles = "admin")]
+        [HttpGet("usuarioId", Name = "GetUsuario")]
+        public IActionResult GetUsuario(string usuarioId)
         {
             var itmUsuario = _repositorio.GetUsuario(usuarioId);
 
-            if(itmUsuario == null)
+            if (itmUsuario == null)
             {
                 return NotFound();
             }
@@ -52,7 +55,8 @@ namespace ApiPelicula.Controllers
             return Ok(_mapper.Map<UsuarioDto>(itmUsuario));
         }
 
-        [HttpPost (Name ="Registro")]
+        [AllowAnonymous]
+        [HttpPost("Registro")]
         public async Task<IActionResult> Registro([FromBody] UsuarioRegistroDto usuarioRegistroDto)
         {
             bool validarNombre = _repositorio.IsUniqueUser(usuarioRegistroDto.NombreUsuario);
@@ -67,7 +71,7 @@ namespace ApiPelicula.Controllers
 
             var usuario = await _repositorio.Registro(usuarioRegistroDto);
 
-            if(usuario == null)
+            if (usuario == null)
             {
                 _respuestaApi.StatusCode = HttpStatusCode.BadRequest;
                 _respuestaApi.IsSuccess = false;
@@ -79,6 +83,7 @@ namespace ApiPelicula.Controllers
             return Ok(_respuestaApi);
         }
 
+        [AllowAnonymous]
         [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] UsuarioLoginDto usuarioLoginDto)
         {
